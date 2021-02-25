@@ -1,6 +1,6 @@
 #include <string>
 
-#include "src/cc_example/constants.h"
+#include "src/cc_example/messages.h"
 
 namespace cc_example {
 
