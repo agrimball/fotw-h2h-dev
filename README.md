@@ -9,6 +9,8 @@ Code is built using Bazel (see http://bazel.build)
 
 ## Example build and run
 
+All commands are run from the Git repo root dir.
+
 bazel build src/org/fotw/h2h:h2h
 
 bazel-bin/src/org/fotw/h2h/h2h (followed by various command line arguments)
