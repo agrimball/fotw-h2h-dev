@@ -11,3 +11,15 @@ cc_library(
     srcs = ["messages.cc"],
     hdrs = ["messages.h"],
 )
+
+cc_test (
+    name = "messages_test",
+    srcs = [
+        "messages_test.cc",
+    ],
+    deps = [
+        ":messages",
+        "@gtest//:gtest",
+        "@gtest//:gtest_main"
+    ],
+)
