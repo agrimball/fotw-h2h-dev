@@ -3,7 +3,10 @@ load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
 cc_binary(
     name = "hello_worlder",
     srcs = ["hello_worlder.cc"],
-    deps = [":messages"],
+    deps = [
+        ":messages",
+        "@com_github_gflags_gflags//:gflags",
+    ],
 )
 
 cc_library(
