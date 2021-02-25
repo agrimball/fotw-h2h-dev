@@ -1,6 +1,6 @@
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
-## PROTO ##
+## Language Build Rules
 
 http_archive(
     name = "zlib",
@@ -14,10 +14,17 @@ http_archive(
 
 http_archive(
     name = "rules_python",
-    strip_prefix = "rules_python-5aa465d5d91f1d9d90cac10624e3d2faf2057bd5/",
-    url = "https://github.com/bazelbuild/rules_python/archive/5aa465d5d91f1d9d90cac10624e3d2faf2057bd5.zip",
-    sha256 = "84923d1907d4ab47e7276ab1d64564c52b01cb31d14d62c8a4e5699ec198cb37",
+    strip_prefix = "rules_python-master/",
+    url = "https://github.com/bazelbuild/rules_python/archive/master.zip",
 )
+
+http_archive(
+    name = "rules_cc",
+    strip_prefix = "rules_cc-master/",
+    url = "https://github.com/bazelbuild/rules_cc/archive/master.zip",
+)
+
+## PROTO ##
 
 # proto_library rules implicitly depend on @com_google_protobuf//:protoc,
 # which is the proto-compiler.
