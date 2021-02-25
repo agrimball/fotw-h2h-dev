@@ -1,0 +1,7 @@
+bazel-fotw-h2h-dev
+bazel-bin
+bazel-genfiles
+bazel-out
+bazel-testlogs
+.idea
+*~
