@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+package src.py_proto_textformat_example;
+
 message MessageSet {
     repeated string message = 1;
 }
