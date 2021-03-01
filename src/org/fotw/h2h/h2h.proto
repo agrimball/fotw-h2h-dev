@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package src.org.fotw.h2h;
+
+message MatchingHistory {
+  repeated MatchSet match_set = 1;
+}
+
+message MatchSet {
+  // The date of the match in YYYYMMDD format (e.g. 20210204).
+  string date_yyyymmdd = 1;
+  repeated Match match = 2;
+}
+
+message Match {
+  repeated string member = 1;
+
+  // May be an empty string.
+  string host = 2;
+}

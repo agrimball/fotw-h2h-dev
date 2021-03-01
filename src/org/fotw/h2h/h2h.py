@@ -17,10 +17,10 @@ TODOs:
 
 Inputs:
 h2h participant CSV
-h2h host CSV
+h2h previous matches textproto file
 
 Outputs:
-updated h2h hosting CSV
+updated h2h matches textproto file
 
 
 Scoring: Load-balanced hosting, then relationship development.
@@ -79,7 +79,7 @@ def validate_inputs(p_info, host_historian):
 
   for a in host_historian.get_all_names():
     if a not in p_name_set:
-      raise Exception('unknown host csv name: ' + a)
+      raise Exception('unknown host name from textproto: ' + a)
 
 
 def push_match_config(host_historian, match_config, match_date):
@@ -153,11 +153,6 @@ def get_match_config_score(p_info, host_historian, match_date):
       (1e6 * host_service_score) -
       min(rel_dev_badness, 1e6)
   )
-
-
-def write_file(path, contents):
-  with open(path, 'w') as out_csv:
-    print(contents, file=out_csv)
 
 
 def gen_match_config(p_config):
@@ -247,13 +242,13 @@ def main(argv):
       required=True,
       help='participants csv file location')
   parser.add_argument(
-      '--host_csv_path',
+      '--host_textproto_path',
       required=True,
-      help='hosting last time & total count csv file location')
+      help='hosting textproto file location')
   parser.add_argument(
-      '--updated_host_csv_path',
+      '--updated_host_textproto_path',
       required=True,
-      help='updated hosting last time & total count csv file location')
+      help='updated hosting textproto file location')
   parser.add_argument(
       '--match_date',
       required=True,
@@ -266,9 +261,9 @@ def main(argv):
 
   match_date = datetime.datetime.strptime(args.match_date, '%Y-%m-%d')
   with open(args.participants_csv_path, 'r') as p_csv_file:
-    with open(args.host_csv_path, 'r') as host_csv_file:
+    with open(args.host_textproto_path, 'r') as host_textproto_file:
       p_info = parse_participant_csv(p_csv_file)
-      host_historian = historian.parse_from_csv_str(host_csv_file.read())
+      host_historian = historian.parse_from_textproto_str(host_textproto_file.read())
       validate_inputs(p_info, host_historian)
 
       best_match_config = get_best_match_config(
@@ -276,8 +271,8 @@ def main(argv):
 
       push_match_config(
           host_historian, best_match_config, match_date)
-      write_file(
-          args.updated_host_csv_path, host_historian.write_to_csv_str('Host'))
+      with open(args.updated_host_textproto_path, 'w') as out_file:
+        print(host_historian.write_to_textproto_str(), file=out_file)
       for match in best_match_config:
         print(match)
       for warning in history_warnings.get_warnings(host_historian):

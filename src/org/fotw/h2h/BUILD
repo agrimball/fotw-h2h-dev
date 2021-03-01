@@ -1,4 +1,5 @@
 load("@rules_python//python:defs.bzl", "py_binary", "py_library", "py_test")
+load("@com_google_protobuf//:protobuf.bzl", "py_proto_library")
 
 py_binary(
     name = "h2h",
@@ -19,14 +20,21 @@ py_test(
 )
 
 py_library(
-    name = "historian",
-    srcs = ["historian.py"],
+  name = "historian",
+  srcs = ["historian.py"],
+  deps = [
+    ":h2h_py_proto",
+    "@com_google_protobuf_python_srcs//:python_srcs",
+  ],
 )
 
 py_test(
     name = "historian_test",
     srcs = [":historian_test.py"],
-    data = [":h2h-testing-csv.csv"],
+    data = [
+      ":h2h-testing-csv.csv",
+      ":h2h-testing-textproto.txt",
+    ],
     deps = [":historian"],
 )
 
@@ -42,4 +50,15 @@ py_test(
         ":historian",
         ":history_warnings",
     ],
+)
+
+py_proto_library(
+    name = "h2h_py_proto",
+    srcs = ["h2h.proto"],
+)
+
+py_binary(
+  name = "host_csv_to_textproto",
+  srcs = ["host_csv_to_textproto.py"],
+  deps = [":historian"],
 )

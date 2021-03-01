@@ -120,7 +120,15 @@ class TestHistorian(unittest.TestCase):
     for a in h.get_all_names():
       for b in h.get_all_names():
         self.assertEqual(h.get_event_dates(a, b), h2.get_event_dates(a, b))
+  
+  def test_write_textproto_str(self):
+    test_srcdir = os.environ['TEST_SRCDIR']
+    testing_textproto_path = test_srcdir + '/__main__/src/org/fotw/h2h/h2h-testing-textproto.txt'
+    with open(testing_textproto_path, 'r') as testing_textproto:
+      expected_textproto_str = testing_textproto.read()
 
+    h = historian.parse_from_textproto_str(expected_textproto_str)
+    self.assertEqual(expected_textproto_str, h.write_to_textproto_str())
 
 if __name__ == '__main__':
   unittest.main()

@@ -2,9 +2,17 @@
 Historian is a class that tracks event dates for a given pair of people.
 """
 
+from src.org.fotw.h2h.h2h_pb2 import MatchingHistory, MatchSet, Match
+from com_google_protobuf_python_srcs.python.google.protobuf import text_format
+
+from collections import defaultdict
 import copy
 import csv
 import datetime
+
+
+_CSV_DATE_FORMAT = '%m/%d/%Y'
+_TEXTPROTO_DATE_FORMAT = '%Y%m%d'
 
 
 def parse_from_csv_str(csv_str):
@@ -38,7 +46,7 @@ def parse_from_csv_str(csv_str):
         continue
       for part in parts:
         try:
-          event_date = datetime.datetime.strptime(part, '%m/%d/%Y')
+          event_date = datetime.datetime.strptime(part, _CSV_DATE_FORMAT)
         except ValueError:
           raise Exception('failed to parse %s' % cell_val)
         h.push_event_date(a_name, b_name, event_date)
@@ -60,6 +68,23 @@ def from_dict(d):
         if not isinstance(event_date, datetime.datetime):
           raise ValueError('from_dict[key][key] entry is not datetime.datetime')
         h.push_event_date(a, b, event_date)
+  return h
+
+
+def parse_from_textproto_str(textproto_str):
+  matching_history = MatchingHistory()
+  text_format.Parse(textproto_str, matching_history)
+  h = Historian()
+  for match_set in matching_history.match_set:
+    try:
+      event_date = datetime.datetime.strptime(match_set.date_yyyymmdd, _TEXTPROTO_DATE_FORMAT)
+    except ValueError:
+      raise Exception('failed to parse match date %s' % match_set.date_yyyymmdd)
+    for match in match_set.match:
+      if not match.host:
+        raise Exception('historian does not yet understand gatherings without hosts')
+      for member in match.member:
+        h.push_event_date(match.host, member, event_date)
   return h
 
 
@@ -132,10 +157,34 @@ class Historian():
           cell_value = ''
         else:
           event_dates = self.get_event_dates(a, b)
-          cell_value = '--'.join([d.strftime('%m/%d/%Y') for d in event_dates])
+          cell_value = '--'.join([d.strftime(_CSV_DATE_FORMAT) for d in event_dates])
         a_row.append(cell_value)
       csv_lines.append(','.join(a_row))
     return '\n'.join(csv_lines)
 
   def to_dict(self):
     return copy.deepcopy(self._event_dates)
+
+  def write_to_textproto_str(self):
+    date_to_host_to_guests = defaultdict(lambda: defaultdict(set))
+    sorted_names = sorted(self.get_all_names())
+
+    for a in sorted_names:
+      for b in sorted_names:
+        if b == a:
+          continue
+        for event_date in self.get_event_dates(a, b):
+          dateyyyymmdd = event_date.strftime(_TEXTPROTO_DATE_FORMAT)
+          date_to_host_to_guests[dateyyyymmdd][a].add(a)
+          date_to_host_to_guests[dateyyyymmdd][a].add(b)
+
+    matching_history = MatchingHistory()
+    for date in sorted(date_to_host_to_guests.keys()):
+      match_set = matching_history.match_set.add()
+      match_set.date_yyyymmdd = date
+      for host in sorted(date_to_host_to_guests[date].keys()):
+        match = match_set.match.add()
+        match.host = host
+        del match.member[:]  # Or potentially match.ClearField('member')
+        match.member.extend(sorted(date_to_host_to_guests[date][host]))
+    return text_format.MessageToString(matching_history)

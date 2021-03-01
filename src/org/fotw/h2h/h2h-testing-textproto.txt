@@ -1,0 +1,24 @@
+match_set {
+  date_yyyymmdd: "20171129"
+  match {
+    member: "Earl"
+    member: "Weavers"
+    host: "Weavers"
+  }
+}
+match_set {
+  date_yyyymmdd: "20180425"
+  match {
+    member: "Earl"
+    member: "Weavers"
+    host: "Weavers"
+  }
+}
+match_set {
+  date_yyyymmdd: "20180711"
+  match {
+    member: "Christian"
+    member: "Weavers"
+    host: "Christian"
+  }
+}
