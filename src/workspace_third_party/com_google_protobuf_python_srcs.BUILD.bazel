@@ -1,0 +1,16 @@
+package(default_visibility = ["//visibility:public"])
+
+py_library(
+    name = "python_srcs",
+    srcs = glob(
+        [
+            "python/google/protobuf/**/*.py",
+        ],
+        exclude = [
+            "python/google/protobuf/internal/*_test.py",
+            "python/google/protobuf/internal/test_util.py",
+        ],
+    ),
+    imports = ["python"],
+    srcs_version = "PY2AND3",
+)

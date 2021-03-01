@@ -4,12 +4,10 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_archive(
     name = "zlib",
-    urls = [
-        "https://mirror.bazel.build/zlib.net/zlib-1.2.11.tar.gz",
-    ],
-    sha256 = "c3e5e9fdd5004dcb542feda5ee4f0ff0744628baf8ed2dd5d66f8ca1197cb1a1",
+    build_file = "@com_google_protobuf//:third_party/zlib.BUILD",
+    sha256 = "629380c90a77b964d896ed37163f5c3a34f6e6d897311f1df2a7016355c45eff",
     strip_prefix = "zlib-1.2.11",
-    build_file = "//src/workspace_third_party:zlib.BUILD.bazel",
+    urls = ["https://github.com/madler/zlib/archive/v1.2.11.tar.gz"],
 )
 
 http_archive(
@@ -42,6 +40,13 @@ git_repository(
 
 ## PROTO ##
 
+http_archive(
+    name = "six",
+    build_file = "@com_google_protobuf//:third_party/six.BUILD",
+    sha256 = "d16a0141ec1a18405cd4ce8b4613101da75da0e9a7aec5bdd4fa804d0e0eba73",
+    urls = ["https://pypi.python.org/packages/source/s/six/six-1.12.0.tar.gz"],
+)
+
 # proto_library rules implicitly depend on @com_google_protobuf//:protoc,
 # which is the proto-compiler.
 # This statement defines the @com_google_protobuf repo.
@@ -57,6 +62,14 @@ http_archive(
     name = "com_google_protobuf_java",
     strip_prefix = "protobuf-master",
     urls = ["https://github.com/protocolbuffers/protobuf/archive/master.zip"],
+)
+
+## Python text formatter
+http_archive(
+    name = "com_google_protobuf_python_srcs",
+    strip_prefix = "protobuf-master",
+    urls = ["https://github.com/protocolbuffers/protobuf/archive/master.zip"],
+    build_file = "//src/workspace_third_party:com_google_protobuf_python_srcs.BUILD.bazel",
 )
 
 http_archive(
