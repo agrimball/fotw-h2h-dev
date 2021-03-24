@@ -5,9 +5,11 @@ py_binary(
     name = "h2h",
     srcs = ["h2h.py"],
     deps = [
-        ":historian",
-        ":history_warnings",
-        ":match_generator",
+      ":h2h_py_proto",
+      ":historian",
+      ":history_warnings",
+      ":match_generator",
+      "@com_google_protobuf_python_srcs//:python_srcs",
     ],
 )
 
@@ -33,7 +35,6 @@ py_library(
   srcs = ["historian.py"],
   deps = [
     ":h2h_py_proto",
-    "@com_google_protobuf_python_srcs//:python_srcs",
   ],
 )
 
@@ -44,7 +45,10 @@ py_test(
       ":h2h-testing-csv.csv",
       ":h2h-testing-textproto.txt",
     ],
-    deps = [":historian"],
+    deps = [
+      ":historian",
+      "@com_google_protobuf_python_srcs//:python_srcs",
+    ],
 )
 
 py_library(

@@ -4,6 +4,16 @@ import unittest
 
 from src.org.fotw.h2h import h2h
 from src.org.fotw.h2h import historian
+from src.org.fotw.h2h.h2h_pb2 import Match, MatchSet
+
+
+def _dict_to_historian(d):
+  host_h = historian.Historian()
+  for a in d.keys():
+    for b in d[a].keys():
+      for event_date in d[a][b]:
+        host_h.push_host_date(a, b, event_date)
+  return host_h
 
 
 class TestH2H(unittest.TestCase):
@@ -25,7 +35,8 @@ class TestH2H(unittest.TestCase):
       },
       "b": {"a": [datetime.datetime(2018, 10, 23), datetime.datetime(2018, 10, 1)]},
     }
-    host_h = historian.from_dict(host_info)
+    
+    host_h = _dict_to_historian(host_info)
 
     self.assertEqual(9, h2h.get_rel_dev_score("a", "b", host_h))
     self.assertEqual(4, h2h.get_rel_dev_score("a", "c", host_h))
@@ -43,7 +54,7 @@ class TestH2H(unittest.TestCase):
     }
     score_a = h2h.get_match_config_score(
         p_info,
-        historian.from_dict(info_a),
+        _dict_to_historian(info_a),
         match_date)
 
     info_b = {
@@ -52,7 +63,7 @@ class TestH2H(unittest.TestCase):
     }
     score_b = h2h.get_match_config_score(
         p_info,
-        historian.from_dict(info_b),
+        _dict_to_historian(info_b),
         match_date)
 
     # info_a is obviously a better configuration, so it should
@@ -69,6 +80,7 @@ class TestH2H(unittest.TestCase):
     match_date = datetime.datetime(2018, 10, 30)
     dt_a = datetime.datetime(2018, 10, 22)
     dt_b = datetime.datetime(2018, 10, 21)
+    dt_c = datetime.datetime(2018, 10, 20)
     info_a = {
       a.name: {
         b.name: [dt_a, dt_b],
@@ -81,26 +93,26 @@ class TestH2H(unittest.TestCase):
     }
     score_a = h2h.get_match_config_score(
         p_info,
-        historian.from_dict(info_a),
+        _dict_to_historian(info_a),
         match_date)
 
     info_b = {
       a.name: {
         b.name: [dt_a],
-        d.name: [dt_a, dt_b, dt_b],
+        d.name: [dt_a, dt_b, dt_c],
       },
       c.name: {
-        b.name: [dt_a, dt_b, dt_b],
+        b.name: [dt_a, dt_b, dt_c],
         d.name: [dt_a],
       },
     }
     score_b = h2h.get_match_config_score(
         p_info,
-        historian.from_dict(info_b),
+        _dict_to_historian(info_b),
         match_date)
 
-    # info_a is obviously a better configuration, so it should
-    # have a higher score.
+    # info_a should be a better configuration since the hosting badness should be identical
+    # but the relationship development is more evenly spread.
     self.assertTrue(score_a > score_b)
 
   def test_get_best_match_config(self):
@@ -121,9 +133,9 @@ class TestH2H(unittest.TestCase):
     p_info = {a.name: a, b.name: b}
 
     host_historian = historian.Historian()
-    host_historian.push_event_date(
+    host_historian.push_host_date(
         a.name, b.name, datetime.datetime(2018, 10, 22))
-    host_historian.push_event_date(
+    host_historian.push_host_date(
         b.name, a.name, datetime.datetime(2018, 10, 23))
 
     best_config = h2h.get_best_match_config(
@@ -131,9 +143,11 @@ class TestH2H(unittest.TestCase):
       host_historian,
       datetime.datetime(2018, 10, 30),
       10)
-    expected_config = [
-      h2h.Match(hosts=[a.name], guests=[b.name])
-    ]
+    expected_config = MatchSet(
+      date_yyyymmdd="20181030",
+      match=[Match(host=a.name, member=[a.name, b.name])],
+    )
+    
     self.assertEqual(expected_config, best_config)
 
 

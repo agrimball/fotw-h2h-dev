@@ -37,7 +37,9 @@ import sys
 from src.org.fotw.h2h import historian
 from src.org.fotw.h2h import history_warnings
 from src.org.fotw.h2h import match_generator
+from src.org.fotw.h2h.h2h_pb2 import MatchingHistory
 
+from com_google_protobuf_python_srcs.python.google.protobuf import text_format
 
 Participant = collections.namedtuple(
     'Participant',
@@ -80,24 +82,22 @@ def validate_inputs(p_info, host_historian):
 def push_match_config(host_historian, match_config, match_date):
   """Updates the host info dictionaries given a match config."""
   for match in match_config.match:
-    for member in match.member:
-      if member == match.host:
-        continue
-      host_historian.push_event_date(match.host, member, match_date)
+    if match.host:
+      host_historian.push_host_date(match.host, match.member, match_date)
+    else:
+      host_historian.push_hostless_date(match.member, match_date)
 
 
-def pull_match_config(host_historian, match_config):
+def pop_match_config(host_historian, match_config, match_date):
   for match in match_config.match:
-    for member in match.member:
-      if member == match.host:
-        continue
-      host_historian.pop_event_date(match.host, member)
+    if match.host:
+      host_historian.pop_host_date(match.host, match.member, match_date)
+    else:
+      host_historian.pop_hostless_date(match.member, match_date)
 
 
 def get_rel_dev_score(a, b, host_historian):
-    meet_count_i_j = len(
-        host_historian.get_event_dates(a, b)
-        + host_historian.get_event_dates(b, a))
+    meet_count_i_j = len(host_historian.get_meetup_dates(a, b))
     return meet_count_i_j ** 2
 
 
@@ -111,8 +111,8 @@ def get_info_score(a, h, match_date):
   most_recent_time = datetime.datetime.min
   total_count = 0
 
-  for b in h.get_associates(a):
-    event_dates = h.get_event_dates(a, b)
+  for b in h.get_past_guests(a):
+    event_dates = h.get_host_dates(a, b)
     if not event_dates:
       continue
     last_time = event_dates[len(event_dates) - 1]
@@ -162,8 +162,8 @@ def get_best_match_config(
         host_historian, match_config, match_date)
     match_config_score = get_match_config_score(
       p_info, host_historian, match_date)
-    pull_match_config(
-        host_historian, match_config)
+    pop_match_config(
+        host_historian, match_config, match_date)
     if max_score is None or match_config_score > max_score:
       max_score = match_config_score
       best_match_config = match_config
@@ -198,7 +198,9 @@ def main(argv):
   with open(args.participants_csv_path, 'r') as p_csv_file:
     with open(args.host_textproto_path, 'r') as host_textproto_file:
       p_info = parse_participant_csv(p_csv_file)
-      host_historian = historian.parse_from_textproto_str(host_textproto_file.read())
+      matching_history = MatchingHistory()
+      text_format.Parse(host_textproto_file.read(), matching_history)
+      host_historian = historian.from_proto(matching_history)
       validate_inputs(p_info, host_historian)
 
       best_match_config = get_best_match_config(
@@ -207,7 +209,7 @@ def main(argv):
       push_match_config(
           host_historian, best_match_config, match_date)
       with open(args.updated_host_textproto_path, 'w') as out_file:
-        print(host_historian.write_to_textproto_str(), file=out_file)
+        print(text_format.MessageToString(host_historian.to_proto()), file=out_file)
       for match in best_match_config.match:
         print(match)
       for warning in history_warnings.get_warnings(host_historian):

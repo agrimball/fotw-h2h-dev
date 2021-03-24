@@ -10,9 +10,9 @@ def get_warnings(host_history):
 def _get_repair_warnings(host_history):
   warnings = []
   all_dates = set()
-  for a in host_history.get_primary_names():
-    for b in host_history.get_associates(a):
-      for event_date in host_history.get_event_dates(a, b):
+  for a in host_history.get_past_host_names():
+    for b in host_history.get_past_guests(a):
+      for event_date in host_history.get_host_dates(a, b):
         all_dates.add(event_date)
 
   sorted_dates = sorted(all_dates)
@@ -22,9 +22,7 @@ def _get_repair_warnings(host_history):
       if b <= a:
         continue
 
-      all_match_dates = set(
-          host_history.get_event_dates(a, b)
-          + host_history.get_event_dates(b, a))
+      all_match_dates = host_history.get_meetup_dates(a, b)
 
       if last_3_dates[len(last_3_dates) - 1] not in all_match_dates:
         # if the most recent match doesn't contribute, then it doesn't matter.
@@ -46,9 +44,9 @@ def _get_repair_warnings(host_history):
 def _get_hosting_fairness_warnings(host_history):
   warnings = []
   all_dates = set()
-  for a in host_history.get_primary_names():
-    for b in host_history.get_associates(a):
-      for event_date in host_history.get_event_dates(a, b):
+  for a in host_history.get_past_host_names():
+    for b in host_history.get_past_guests(a):
+      for event_date in host_history.get_host_dates(a, b):
         all_dates.add(event_date)
 
   sorted_dates = sorted(all_dates)
@@ -56,7 +54,7 @@ def _get_hosting_fairness_warnings(host_history):
   for a in host_history.get_all_names():
     all_host_dates = []
     for b in host_history.get_all_names():
-      all_host_dates += host_history.get_event_dates(a, b)
+      all_host_dates += host_history.get_host_dates(a, b)
     all_host_dates = set(all_host_dates)
 
     if last_2_dates[0] in all_host_dates and last_2_dates[1] in all_host_dates:
