@@ -27,8 +27,9 @@ def gen_match_config(match_date, p_config):
     if i >= len(p_names):
       return None, False
 
-    possible_coguest_len = 0
+    n_guests = -1
     if not is_hosted:
+      possible_coguest_len = 0
       group_gender = p_config[first_p_name].gender_if_single
       while (
         i + possible_coguest_len < len(p_names)
