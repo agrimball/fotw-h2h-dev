@@ -31,9 +31,9 @@ def gen_match_config(match_date, p_config):
     # p_names[i] is now the first guest participant. Figure out how many
     # co-guests are possible.
     # Constraint: at most one family, no large families with singles..
-    possible_coguest_len = 1
-    has_family = p_config[p_names[i]].is_family
-    has_singles = not has_family
+    possible_coguest_len = 0
+    has_family = False
+    has_singles = False
     while (
         i + possible_coguest_len < len(p_names)
         and not (
