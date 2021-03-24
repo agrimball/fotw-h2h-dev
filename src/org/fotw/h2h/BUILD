@@ -42,7 +42,6 @@ py_test(
     name = "historian_test",
     srcs = [":historian_test.py"],
     data = [
-      ":h2h-testing-csv.csv",
       ":h2h-testing-textproto.txt",
     ],
     deps = [

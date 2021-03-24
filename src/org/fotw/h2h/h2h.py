@@ -44,7 +44,7 @@ from com_google_protobuf_python_srcs.python.google.protobuf import text_format
 Participant = collections.namedtuple(
     'Participant',
     ['name', 'is_family', 'residence', 'participating', 'can_host',
-     'child_count'])
+     'child_count', 'gender_if_single'])
 
 
 def parse_participant_csv(p_csv_file):
@@ -63,7 +63,8 @@ def parse_participant_csv(p_csv_file):
         residence=row[2],
         participating=(row[3] == 'Y'),
         can_host=(row[4] == 'Y'),
-        child_count=num_children)
+        child_count=num_children,
+        gender_if_single=row[6])
     p_config[p.name] = p
   return p_config
 
@@ -73,6 +74,8 @@ def validate_inputs(p_info, host_historian):
   p_name_set = set([name for name in p_info])
   for name in p_info:
     p = p_info[name]
+    if not p.is_family and p.gender_if_single not in ['M','F']:
+      raise ValueError('no gender for single participant: ' + name)    
 
   for a in host_historian.get_all_names():
     if a not in p_name_set:

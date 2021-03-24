@@ -25,7 +25,8 @@ class TestH2H(unittest.TestCase):
       residence=name,
       participating=True,
       can_host=can_host,
-      child_count=0)
+      child_count=0,
+      gender_if_single='')
 
   def test_get_rel_dev_score(self):
     host_info = {
@@ -122,14 +123,16 @@ class TestH2H(unittest.TestCase):
       residence="2 Snow Ter",
       participating=True,
       can_host=True,
-      child_count=0)
+      child_count=0,
+      gender_if_single='')
     b = h2h.Participant(
       name="b",
       is_family=True,
       residence="4 Snow Ter",
       participating=True,
       can_host=True,
-      child_count=0)
+      child_count=0,
+      gender_if_single='')
     p_info = {a.name: a, b.name: b}
 
     host_historian = historian.Historian()
