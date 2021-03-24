@@ -157,10 +157,12 @@ def get_best_match_config(
     p_info, host_historian, match_date, n):
   max_score = None
   best_match_config = None
+  failed_match_generations = 0
   for _ in range(n):
     match_config, found_match = match_generator.gen_match_config(match_date, p_info)
     while not found_match:
       match_config, found_match = match_generator.gen_match_config(match_date, p_info)
+      failed_match_generations += 1
     push_match_config(
         host_historian, match_config, match_date)
     match_config_score = get_match_config_score(
@@ -170,7 +172,7 @@ def get_best_match_config(
     if max_score is None or match_config_score > max_score:
       max_score = match_config_score
       best_match_config = match_config
-  return best_match_config
+  return best_match_config, failed_match_generations
 
 
 def main(argv):
@@ -206,8 +208,9 @@ def main(argv):
       host_historian = historian.from_proto(matching_history)
       validate_inputs(p_info, host_historian)
 
-      best_match_config = get_best_match_config(
+      best_match_config, failed_match_generations = get_best_match_config(
         p_info, host_historian, match_date, int(args.N))
+      print('failed match generations: %d' % failed_match_generations)
 
       push_match_config(
           host_historian, best_match_config, match_date)

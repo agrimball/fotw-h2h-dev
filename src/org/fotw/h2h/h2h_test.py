@@ -141,7 +141,7 @@ class TestH2H(unittest.TestCase):
     host_historian.push_host_date(
         b.name, a.name, datetime.datetime(2018, 10, 23))
 
-    best_config = h2h.get_best_match_config(
+    best_config, _ = h2h.get_best_match_config(
       p_info,
       host_historian,
       datetime.datetime(2018, 10, 30),
