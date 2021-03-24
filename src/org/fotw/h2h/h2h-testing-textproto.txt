@@ -22,3 +22,11 @@ match_set {
     host: "Christian"
   }
 }
+match_set {
+  date_yyyymmdd: "20210324"
+  match {
+    member: "Christian"
+    member: "Earl"
+    member: "Weavers"
+  }
+}
