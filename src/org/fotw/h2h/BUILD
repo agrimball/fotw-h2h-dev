@@ -7,16 +7,25 @@ py_binary(
     deps = [
         ":historian",
         ":history_warnings",
+        ":matcher",
     ],
 )
 
 py_test(
     name = "h2h_test",
-    srcs = [":h2h_test.py"],
+    srcs = ["h2h_test.py"],
     deps = [
         ":h2h",
         ":historian",
     ],
+)
+
+py_library(
+  name = "matcher",
+  srcs = ["matcher.py"],
+  deps = [
+    ":h2h_py_proto",
+  ],
 )
 
 py_library(

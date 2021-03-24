@@ -36,18 +36,13 @@ import sys
 
 from src.org.fotw.h2h import historian
 from src.org.fotw.h2h import history_warnings
-
-
-# Respected in gen_match_config
-MAX_GUEST_COUNT = 2
+from src.org.fotw.h2h import matcher
 
 
 Participant = collections.namedtuple(
     'Participant',
     ['name', 'is_family', 'residence', 'participating', 'can_host',
      'child_count'])
-Match = collections.namedtuple(
-    'Match', ['hosts', 'guests'])
 
 
 def parse_participant_csv(p_csv_file):
@@ -84,19 +79,19 @@ def validate_inputs(p_info, host_historian):
 
 def push_match_config(host_historian, match_config, match_date):
   """Updates the host info dictionaries given a match config."""
-  for match in match_config:
-    # Update host_info
-    for host in match.hosts:
-      for guest in match.guests:
-        host_historian.push_event_date(host, guest, match_date)
+  for match in match_config.match:
+    for member in match.member:
+      if member == match.host:
+        continue
+      host_historian.push_event_date(match.host, member, match_date)
 
 
 def pull_match_config(host_historian, match_config):
-  for match in match_config:
-    # Update host_info
-    for host in match.hosts:
-      for guest in match.guests:
-        host_historian.pop_event_date(host, guest)
+  for match in match_config.match:
+    for member in match.member:
+      if member == match.host:
+        continue
+      host_historian.pop_event_date(match.host, member)
 
 
 def get_rel_dev_score(a, b, host_historian):
@@ -155,74 +150,14 @@ def get_match_config_score(p_info, host_historian, match_date):
   )
 
 
-def gen_match_config(p_config):
-  """Returns (matches, found_match) for a given participant config."""
-  p_names = [p_name for p_name in p_config if p_config[p_name].participating]
-  random.shuffle(p_names)  # Shuffles in-place.
-
-  # matches: [([host1, host2], [guest1, guest2]), ...]
-  matches = []
-  i = 0
-  while i < len(p_names):
-    # Starting with this participant, figure out how many can co-host.
-    # Constraint: hosts must live at same residence.
-    possible_cohost_len = 1
-    while (
-        i + possible_cohost_len < len(p_names)
-        and (
-            p_config[p_names[i+possible_cohost_len]].residence ==
-            p_config[p_names[i]].residence
-            )
-        ):
-      possible_cohost_len += 1
-    # Randomly choose the number that will host together.
-    n_hosts = random.randint(1, possible_cohost_len)
-    host_names = p_names[i:i+n_hosts]
-    i += n_hosts
-
-    # Check that we're respecting the and can_host bits.
-    if not p_config[host_names[0]].can_host:
-      return None, False
-
-    if i >= len(p_names):
-      return None, False
-
-    # p_names[i] is now the first guest participant. Figure out how many
-    # co-guests are possible.
-    # Constraint: at most one family, no large families with singles..
-    possible_coguest_len = 1
-    has_family = p_config[p_names[i]].is_family
-    has_singles = not has_family
-    while (
-        i + possible_coguest_len < len(p_names)
-        and not (
-            (has_family and p_config[p_names[i+possible_coguest_len]].is_family)
-            or (has_singles and p_config[p_names[i+possible_coguest_len]].child_count >= 5)
-            )
-        ):
-      has_family = (
-          has_family or p_config[p_names[i+possible_coguest_len]].is_family)
-      has_singles = (
-          has_singles or (not p_config[p_names[i+possible_coguest_len]].is_family))
-      possible_coguest_len += 1
-    # Randomly choose the number that will guest together.
-    n_guests = random.randint(1, min(possible_coguest_len, MAX_GUEST_COUNT))
-    guest_names = p_names[i:i+n_guests]
-    i += n_guests
-
-    matches.append(
-        Match(hosts=host_names, guests=guest_names))
-  return matches, True
-
-
 def get_best_match_config(
     p_info, host_historian, match_date, n):
   max_score = None
   best_match_config = None
   for _ in range(n):
-    match_config, found_match = gen_match_config(p_info)
+    match_config, found_match = matcher.gen_match_config(match_date, p_info)
     while not found_match:
-      match_config, found_match = gen_match_config(p_info)
+      match_config, found_match = matcher.gen_match_config(match_date, p_info)
     push_match_config(
         host_historian, match_config, match_date)
     match_config_score = get_match_config_score(
@@ -273,7 +208,7 @@ def main(argv):
           host_historian, best_match_config, match_date)
       with open(args.updated_host_textproto_path, 'w') as out_file:
         print(host_historian.write_to_textproto_str(), file=out_file)
-      for match in best_match_config:
+      for match in best_match_config.match:
         print(match)
       for warning in history_warnings.get_warnings(host_historian):
         print(warning)
