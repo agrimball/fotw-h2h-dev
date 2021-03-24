@@ -36,7 +36,7 @@ import sys
 
 from src.org.fotw.h2h import historian
 from src.org.fotw.h2h import history_warnings
-from src.org.fotw.h2h import matcher
+from src.org.fotw.h2h import match_generator
 
 
 Participant = collections.namedtuple(
@@ -155,9 +155,9 @@ def get_best_match_config(
   max_score = None
   best_match_config = None
   for _ in range(n):
-    match_config, found_match = matcher.gen_match_config(match_date, p_info)
+    match_config, found_match = match_generator.gen_match_config(match_date, p_info)
     while not found_match:
-      match_config, found_match = matcher.gen_match_config(match_date, p_info)
+      match_config, found_match = match_generator.gen_match_config(match_date, p_info)
     push_match_config(
         host_historian, match_config, match_date)
     match_config_score = get_match_config_score(
