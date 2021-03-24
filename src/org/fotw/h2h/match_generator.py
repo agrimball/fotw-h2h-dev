@@ -21,7 +21,7 @@ def gen_match_config(match_date, p_config):
     host_name = p_names[i]
     i += 1
 
-    # Check that we're respecting the and can_host bits.
+    # Check that we're respecting the can_host bit.
     if not p_config[host_name].can_host:
       return None, False
 
