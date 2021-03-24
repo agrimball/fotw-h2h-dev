@@ -13,6 +13,7 @@ cc_library(
     name = "messages",
     srcs = ["messages.cc"],
     hdrs = ["messages.h"],
+    deps = ["@com_google_absl//absl/strings"],
 )
 
 cc_test (
