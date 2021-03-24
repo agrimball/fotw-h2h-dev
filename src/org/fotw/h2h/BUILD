@@ -69,9 +69,3 @@ py_proto_library(
     name = "h2h_py_proto",
     srcs = ["h2h.proto"],
 )
-
-py_binary(
-  name = "host_csv_to_textproto",
-  srcs = ["host_csv_to_textproto.py"],
-  deps = [":historian"],
-)
