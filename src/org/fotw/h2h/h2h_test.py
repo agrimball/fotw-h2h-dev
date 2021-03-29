@@ -22,7 +22,6 @@ class TestH2H(unittest.TestCase):
     return h2h.Participant(
       name=name,
       is_family=True,
-      residence=name,
       participating=True,
       can_host=can_host,
       child_count=0,
@@ -120,7 +119,6 @@ class TestH2H(unittest.TestCase):
     a = h2h.Participant(
       name="a",
       is_family=True,
-      residence="2 Snow Ter",
       participating=True,
       can_host=True,
       child_count=0,
@@ -128,7 +126,6 @@ class TestH2H(unittest.TestCase):
     b = h2h.Participant(
       name="b",
       is_family=True,
-      residence="4 Snow Ter",
       participating=True,
       can_host=True,
       child_count=0,

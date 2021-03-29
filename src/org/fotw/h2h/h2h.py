@@ -43,7 +43,7 @@ from com_google_protobuf_python_srcs.python.google.protobuf import text_format
 
 Participant = collections.namedtuple(
     'Participant',
-    ['name', 'is_family', 'residence', 'participating', 'can_host',
+    ['name', 'is_family', 'participating', 'can_host',
      'child_count', 'gender_if_single'])
 
 
@@ -56,15 +56,14 @@ def parse_participant_csv(p_csv_file):
       is_first_row = False
       continue
 
-    num_children = int(row[5] or 0)
+    num_children = int(row[4] or 0)
     p = Participant(
         name=row[0],
         is_family=(row[1] == 'Y'),
-        residence=row[2],
-        participating=(row[3] == 'Y'),
-        can_host=(row[4] == 'Y'),
+        participating=(row[2] == 'Y'),
+        can_host=(row[3] == 'Y'),
         child_count=num_children,
-        gender_if_single=row[6])
+        gender_if_single=row[5])
     p_config[p.name] = p
   return p_config
 
