@@ -216,7 +216,10 @@ def main(argv):
       with open(args.updated_host_textproto_path, 'w') as out_file:
         print(text_format.MessageToString(host_historian.to_proto()), file=out_file)
       for match in best_match_config.match:
-        print(match)
+        if match.host:
+          print(match.host + ': ' + ', '.join([m for m in match.member if m != match.host]))
+        else:
+          print('hostless: ' + ', '.join(match.member))
       for warning in history_warnings.get_warnings(host_historian):
         print(warning)
 

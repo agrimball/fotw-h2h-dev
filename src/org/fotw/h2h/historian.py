@@ -179,7 +179,19 @@ class Historian():
         hostless_groups = []
         name_to_group_index = {}
         for (a, b) in date_to_hostless_gatherings[event_date]:
-          if a in name_to_group_index:
+          if a in name_to_group_index and b in name_to_group_index:
+            if name_to_group_index[a] == name_to_group_index[b]:
+              continue # No need to merge
+            # Merge groups (from b's group to a's group)!
+            to_idx = name_to_group_index[a]
+            from_idx = name_to_group_index[b]
+            hostless_groups[to_idx].update(hostless_groups[from_idx])
+            # Update name_to_group_index for old group members
+            for m in hostless_groups[from_idx]:
+              name_to_group_index[m] = to_idx
+            # Empty the old group so there's no ambiguity
+            hostless_groups[from_idx] = set()
+          elif a in name_to_group_index:
             hostless_groups[name_to_group_index[a]].add(b)
             name_to_group_index[b] = name_to_group_index[a]
           elif b in name_to_group_index:
@@ -190,6 +202,7 @@ class Historian():
             name_to_group_index[a] = len(hostless_groups) - 1
             name_to_group_index[b] = name_to_group_index[a]
 
+        hostless_groups = [g for g in hostless_groups if len(g) > 0]
         hostless_groups.sort(key=lambda group: min(group))
         for hostless_group in hostless_groups:
           match = match_set.match.add()
