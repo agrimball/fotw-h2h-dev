@@ -158,9 +158,9 @@ def get_best_match_config(
   best_match_config = None
   failed_match_generations = 0
   for _ in range(n):
-    match_config, found_match = match_generator.gen_match_config(match_date, p_info)
+    match_config, found_match = match_generator.gen_sprinkler_match_config(match_date, p_info)
     while not found_match:
-      match_config, found_match = match_generator.gen_match_config(match_date, p_info)
+      match_config, found_match = match_generator.gen_sprinkler_match_config(match_date, p_info)
       failed_match_generations += 1
     push_match_config(
         host_historian, match_config, match_date)
