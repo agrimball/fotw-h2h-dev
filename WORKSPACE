@@ -12,14 +12,14 @@ http_archive(
 
 http_archive(
     name = "rules_python",
-    strip_prefix = "rules_python-master/",
-    url = "https://github.com/bazelbuild/rules_python/archive/master.zip",
+    strip_prefix = "rules_python-main/",
+    url = "https://github.com/bazelbuild/rules_python/archive/main.zip",
 )
 
 http_archive(
     name = "rules_cc",
-    strip_prefix = "rules_cc-master/",
-    url = "https://github.com/bazelbuild/rules_cc/archive/master.zip",
+    strip_prefix = "rules_cc-main/",
+    url = "https://github.com/bazelbuild/rules_cc/archive/main.zip",
 )
 
 ## GoogleTest C++
@@ -74,8 +74,8 @@ http_archive(
 
 http_archive(
     name = "bazel_skylib",
-    strip_prefix = "bazel-skylib-master",
-    urls = ["https://github.com/bazelbuild/bazel-skylib/archive/master.zip"],
+    strip_prefix = "bazel-skylib-main",
+    urls = ["https://github.com/bazelbuild/bazel-skylib/archive/main.zip"],
 )
 
 load("@bazel_skylib//lib:versions.bzl", "versions")
